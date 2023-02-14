@@ -1,12 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 )
 
 const webPort = "80"
+
+func (app *Config) serve() {
+	//start http server
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
+	}
+	app.InfoLog.Println("Starting web server......")
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Panic(err)
+	}
+}
 
 func main() {
 
@@ -37,4 +52,5 @@ func main() {
 	//set up mail
 
 	//listen for web application
+	app.serve()
 }
