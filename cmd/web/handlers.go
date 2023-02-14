@@ -19,3 +19,6 @@ func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {}
+
+//send activation email to confirm we have the valid email address
+func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {}
