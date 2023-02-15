@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"database/sql"
@@ -11,7 +11,7 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-func initDB() *sql.DB {
+func InitDB() *sql.DB {
 	conn := connectToDB()
 	if conn == nil {
 		log.Panic("can't connect to database")

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"subscription-service/database"
 	"sync"
 	"syscall"
 )
@@ -57,7 +58,7 @@ func (app *Config) Shutdown() {
 	app.InfoLog.Println("would run cleaning up tasks....")
 
 	//block until waitgroup is empty(counter hits 0)
-	//waits untilthe goroutine executes
+	//waits until the goroutine executes
 	app.Wait.Wait()
 
 	app.InfoLog.Println("closing channels and shutting down application..")
@@ -66,7 +67,7 @@ func (app *Config) Shutdown() {
 func main() {
 
 	//connect to db
-	db := initDB()
+	db := database.InitDB()
 	//db.Ping()
 
 	//create loggers
@@ -88,6 +89,7 @@ func main() {
 		Wait:     &wg,
 		ErrorLog: errorLog,
 		InfoLog:  infoLog,
+		Models:   database.New(db),
 	}
 
 	//set up mail
