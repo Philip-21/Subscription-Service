@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vanng822/go-premailer/premailer"
+	"github.com/vanng822/go-premailer/premailer" //premailer designs the css that wll be displayed in the html
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
