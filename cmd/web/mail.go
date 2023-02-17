@@ -39,13 +39,53 @@ type Message struct {
 }
 
 // a func a listen for messages on the mailerChan
+func (app *Config) ListenForMail() {
+	//listen to diff channels
+	for {
+		select {
+		//receiving data from the Mail channel
+		case msg := <-app.Mailer.MailerChan:
+			//send email to the go routine
+			go app.Mailer.SendMail(msg, app.Mailer.ErrorChan)
+
+		case err := <-app.Mailer.ErrorChan:
+			app.ErrorLog.Println(err)
+
+		case <-app.Mailer.DoneChan:
+			return
+		}
+	}
+
+}
+
+func (app *Config) createMail() Mail {
+	//create channels
+	errorChan := make(chan error)
+	mailerChan := make(chan Message, 100) //a buffered channel taking in 100messages before it locks
+	mailerDoneChan := make(chan bool)
+
+	m := Mail{
+		Domain:      "localhost",
+		Host:        "localhost",
+		Port:        1025,
+		Encryption:  "none",
+		FromAddress: "philip@company.com",
+		FromName:    "philip",
+		ErrorChan:   errorChan,
+		MailerChan:  mailerChan,
+		DoneChan:    mailerDoneChan,
+	}
+	return m
+}
 
 func (m *Mail) SendMail(msg Message, errorChan chan error) {
+	//decrement wait group
+	defer m.Wait.Done()
+
 	if msg.Template == "" {
 		//gets both the plin text and html message
 		msg.Template = "mail"
 	}
-
 	if msg.From == "" {
 		msg.From = m.FromAddress
 	}

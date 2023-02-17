@@ -16,4 +16,5 @@ type Config struct {
 	ErrorLog *log.Logger
 	Wait     *sync.WaitGroup
 	Models   database.Models
+	Mailer   Mail //defining the mail struct for the mail server
 }

@@ -68,7 +68,6 @@ func main() {
 
 	//connect to db
 	db := database.InitDB()
-	//db.Ping()
 
 	//create loggers
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -93,6 +92,8 @@ func main() {
 	}
 
 	//set up mail
+	app.Mailer = app.createMail()
+	go app.ListenForMail()
 
 	//listen for signals
 	go app.ListenForShutdown()
