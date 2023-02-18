@@ -113,6 +113,33 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 // send activation email to confirm we have the valid email address
 func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	// validate url
+	url := r.RequestURI
+	testUrl := fmt.Sprintf("http://localhost%s", url)
+	okay := VerifyToken(testUrl) //the url with the hash appended to it
+	if !okay {
+		app.Session.Put(r.Context(), "error", "invalid token")
+		app.ErrorLog.Println("invalid token")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	//activate account
+	u, err := app.Models.User.GetByEmail(r.URL.Query().Get("email"))
+	if err != nil {
+		app.Session.Put(r.Context(), "error", "No User Found")
+		app.ErrorLog.Println("No User Found")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	u.Active = 1
+	err = u.Update()
+	if err != nil {
+		app.Session.Put(r.Context(), "error", "Unable User to update User.")
+		app.ErrorLog.Println("Unable to update user")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	app.Session.Put(r.Context(), "flash", "Account activated . Ypu can login.")
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 
 	// generate an invoice
 
@@ -121,4 +148,24 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	// send an email with the invoice attached
 
 	//subscribe the User is an Account
+}
+
+func (app *Config) ChooseSubscription(w http.ResponseWriter, r *http.Request) {
+	if !app.Session.Exists(r.Context(), "userID") {
+		app.Session.Put(r.Context(), "warning", "Login to access this page")
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		return
+	}
+	plans, err := app.Models.Plan.GetAll()
+	if err != nil {
+		app.ErrorLog.Println(err)
+		return
+	}
+
+	//pass the var to the template
+	dataMap := make(map[string]any)
+	dataMap["plans"] = plans
+	app.render(w, r, "plans.page.gohtml", &TemplateData{
+		Data: dataMap,
+	})
 }
