@@ -10,7 +10,7 @@ import (
 func (app *Config) sendemail(msg Message) {
 	//add counter to waitgroup , increment wg by 1
 	app.Wait.Add(1)
-	app.Mailer.MailerChan <- msg //send message to the mail channel
+	app.Mailer.MailerChan <- msg //send message to the mail channel(speaks to the MailerChan object in the config struct which will be accessed by any of the handlers)
 }
 
 /*
