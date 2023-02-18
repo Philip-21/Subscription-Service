@@ -29,7 +29,6 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
 	// check password
 	validPassword, err := user.PasswordMatches(password)
 	if err != nil {
@@ -51,14 +50,10 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-
-	// okay, so log user in
 	app.Session.Put(r.Context(), "userID", user.ID)
 	app.Session.Put(r.Context(), "user", user)
 
 	app.Session.Put(r.Context(), "flash", "Successful login!")
-
-	// redirect the user
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
