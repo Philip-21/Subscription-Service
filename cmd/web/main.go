@@ -5,10 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"subscription-service/database"
 	"sync"
-	"syscall"
 )
 
 const webPort = "80"
@@ -24,44 +22,6 @@ func (app *Config) serve() {
 	if err != nil {
 		log.Panic(err)
 	}
-}
-
-/*
-gracefully shut down in response to certain signals and ensures
-that all running goroutines complete their work before the application exits.
-it closes channels and shuts down the app
-*/
-
-/*
-ListenForShutdown() method sets up a channel called quit and registers a notification with the signal package
-to listen for two signals: SIGINT and SIGTERM.
-These signals indicate that the application should be shut down gracefully.
-Once one of these signals is received,
-the method blocks until the Shutdown() method is called
-*/
-func (app *Config) ListenForShutdown() {
-	quit := make(chan os.Signal, 1)
-	//Notify causes package signal to relay incoming signals
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	app.Shutdown()
-
-	os.Exit(0)
-}
-
-/*
-Shutdown() method is responsible for performing any necessary
-cleanup tasks and waiting for all running goroutines to complete
-*/
-func (app *Config) Shutdown() {
-	//perform any cleanup task
-	app.InfoLog.Println("would run cleaning up tasks....")
-
-	//block until waitgroup is empty(counter hits 0)
-	//waits until the goroutine executes
-	app.Wait.Wait()
-
-	app.InfoLog.Println("closing channels and shutting down application..")
 }
 
 func main() {
