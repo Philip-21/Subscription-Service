@@ -8,11 +8,11 @@ import (
 )
 
 func (app *Config) homePage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "home.page.gohtml", nil)
+	app.render(w, r, "home.page.go.html", nil)
 }
 
 func (app *Config) Loginpage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "login.page.gohtml", nil)
+	app.render(w, r, "login.page.go.html", nil)
 }
 
 func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "register.page.gohtml", nil)
+	app.render(w, r, "register.page.go.html", nil)
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
@@ -149,6 +149,25 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 
 	//subscribe the User is an Account
 }
+func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
+	// get the id of the plan that is chosen
+
+	// get the plan from the database
+
+	// get the user from the session
+
+	// generate an invoice
+
+	// send an email with the invoice attached
+
+	// generate a manual
+
+	// send an email with the manual attached
+
+	// subscribe the user to an account
+
+	// redirect
+}
 
 func (app *Config) ChooseSubscription(w http.ResponseWriter, r *http.Request) {
 	if !app.Session.Exists(r.Context(), "userID") {
@@ -165,7 +184,7 @@ func (app *Config) ChooseSubscription(w http.ResponseWriter, r *http.Request) {
 	//pass the var to the template
 	dataMap := make(map[string]any)
 	dataMap["plans"] = plans
-	app.render(w, r, "plans.page.gohtml", &TemplateData{
+	app.render(w, r, "plans.page.go.html", &TemplateData{
 		Data: dataMap,
 	})
 }

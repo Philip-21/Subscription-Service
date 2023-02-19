@@ -58,6 +58,7 @@ func (app *Config) ListenForMail() {
 
 }
 
+// creating a mail server
 func (app *Config) createMail() Mail {
 	//create channels
 	errorChan := make(chan error)
@@ -95,7 +96,9 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	//send info to the 2 templates
 
 	data := map[string]any{
-		"message": msg.Data, //displays the message in the template
+		//.message is called from the template and
+		//displays the message in the template
+		"message": msg.Data, //calls the interface data field
 	}
 	msg.DataMap = data
 	// build html mail
@@ -104,13 +107,11 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 		//sending error to the channel
 		errorChan <- err
 	}
-
 	// build plain text mail
 	plainMessage, err := m.buildPlainTextMessage(msg)
 	if err != nil {
 		errorChan <- err
 	}
-
 	server := mail.NewSMTPClient()
 	server.Host = m.Host
 	server.Port = m.Port
@@ -125,7 +126,6 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	if err != nil {
 		errorChan <- err
 	}
-
 	email := mail.NewMSG()
 	email.SetFrom(msg.From).AddTo(msg.To).SetSubject(msg.Subject)
 
@@ -137,7 +137,6 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 			email.AddAttachment(x)
 		}
 	}
-
 	err = email.Send(smtpClient)
 	if err != nil {
 		errorChan <- err
@@ -146,7 +145,7 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 }
 
 func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.gohtml", msg.Template)
+	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.go.html", msg.Template) //display the name of the template called from the handlers
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
 	if err != nil {
@@ -163,23 +162,20 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return formattedMessage, nil
 }
 
 func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
+	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.go.html", msg.Template)
 
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
 	if err != nil {
 		return "", err
 	}
-
 	var tpl bytes.Buffer
 	if err = t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
 		return "", err
 	}
-
 	plainMessage := tpl.String()
 
 	return plainMessage, nil

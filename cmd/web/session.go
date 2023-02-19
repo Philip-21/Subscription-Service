@@ -34,3 +34,8 @@ func initRedis() *redis.Pool {
 
 	return redisPool
 }
+
+// a secure session a used when a user is logged in
+func (app *Config) IsAuthenticated(r *http.Request) bool {
+	return app.Session.Exists(r.Context(), "userID")
+}

@@ -53,6 +53,7 @@ func main() {
 
 	//set up mail
 	app.Mailer = app.createMail()
+	//listens and sends mail asynchronously
 	go app.ListenForMail()
 
 	//listen for signals
