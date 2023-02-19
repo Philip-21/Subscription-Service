@@ -1,7 +1,8 @@
 {{template "base" .}}
 
 {{define "content" }}
-    {{$user := .User}}
+    <!--Making a decison weather a user has a plan-->
+    {{$user := .User}} <!--gets the User struct-->
     <div class="container">
         <div class="row">
             <div class="col-md-8 offset-md-2">
@@ -21,9 +22,12 @@
                                 <td>{{.PlanName}}</td>
                                 <td class="text-center">{{.PlanAmountFormatted}}/month</td>
                                 <td class="text-center">
+                                    <!--if user has a plan, then display the current Plan -->
+                                    <!--refers to the plan ID from the user struct-->
                                     {{if and ($user.Plan) (eq $user.Plan.ID .ID)}}
                                         <strong>Current Plan</strong>
                                     {{else}}
+                                         <!--select a plan -->
                                         <a class="btn btn-primary btn-sm" href="#!" onclick="selectPlan({{.ID}}, '{{.PlanName}}')">Select</a>
                                     {{end}}
                                 </td>
