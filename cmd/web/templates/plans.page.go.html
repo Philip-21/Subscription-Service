@@ -1,0 +1,38 @@
+{{template "base" .}}
+
+{{define "content" }}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h1 class="mt-5">Plans</h1>
+                <hr>
+                <table class= "table table-compact tab;e-striped">
+                 <thead>
+                   <tr>
+                     <th>Plan</th>
+                     <th class="text-center">Price</th>
+                       <th class="text-center">Select</th>
+                   </tr>
+                   </thead>
+                   <tbody>
+                     {{range index .Data "plan"}}
+                       <tr>
+                         <td>{{.PlanName}}</td>
+                         <td class="text-center">{{.PlanAmountFormatted}}/month<td>
+                         <td class ="text-center"
+
+                     {{end}}
+                   </tbody>     
+
+               
+            </div>
+
+        </div>
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+
+    </script>
+{{end}}
