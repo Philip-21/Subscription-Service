@@ -2,6 +2,16 @@ BINARY_NAME=myapp
 DSN="host=localhost port=5432 user=postgres password=password dbname=concurrency sslmode=disable timezone=UTC connect_timeout=5"
 REDIS="127.0.0.1:6379"
 
+up_build :
+	@echo "Stopping Docker Images if Running...."
+	docker-compose down 
+	@echo "Building Docker Images were necessary"
+	docker-compose up --build 
+up :  
+	@echo "Starting Docker Images"
+	docker-compose up -d
+	@echo "Docker Images Started"
+      
 ## build: Build binary
 build:
 	@echo "Building..."
