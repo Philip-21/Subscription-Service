@@ -7,7 +7,7 @@ function selectPlan(x, plan) {
           confirmButtonText: 'Subscribe',
       }).then((result) => {
           if (result.isConfirmed) {
-              window.location.href = '/subscribe?id=' + x;
+              window.location.href = '/members/subscribe?id=' + x;
           }
       })
   }
