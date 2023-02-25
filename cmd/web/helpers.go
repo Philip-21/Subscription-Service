@@ -6,13 +6,6 @@ import (
 	"syscall"
 )
 
-// a  helper wrapper to send email easily
-func (app *Config) sendemail(msg Message) {
-	//add counter to waitgroup , increment wg by 1
-	app.Wait.Add(1)
-	app.Mailer.MailerChan <- msg //send message to the mail channel(speaks to the MailerChan object in the config struct which will be accessed by any of the handlers)
-}
-
 /*
 gracefully shut down in response to certain signals and ensures
 that all running goroutines complete their work before the application exits.
