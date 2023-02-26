@@ -28,14 +28,22 @@ type Mail struct {
 }
 
 type Message struct {
-	From        string
-	FromName    string
-	To          string
-	Subject     string
-	Attachments string
-	Data        any
-	DataMap     map[string]any
-	Template    string
+	From          string
+	FromName      string
+	To            string
+	Subject       string
+	Attachments   string
+	AttachmentMap map[string]string
+	Data          any
+	DataMap       map[string]any
+	Template      string
+}
+
+// a  helper wrapper to send email easily
+func (app *Config) sendemail(msg Message) {
+	//add counter to waitgroup , increment wg by 1
+	app.Wait.Add(1)
+	app.Mailer.MailerChan <- msg //send message to the mail channel(speaks to the MailerChan object in the config struct which will be accessed by any of the handlers)
 }
 
 // a func a listen for messages on the mailerChan
@@ -49,8 +57,7 @@ func (app *Config) ListenForMail() {
 			go app.Mailer.SendMail(msg, app.Mailer.ErrorChan)
 
 		case err := <-app.Mailer.ErrorChan:
-			app.ErrorLog.Println(err)
-
+			app.ErrorLog.Println("error in mail", err)
 		case <-app.Mailer.DoneChan:
 			return
 		}
@@ -58,7 +65,7 @@ func (app *Config) ListenForMail() {
 
 }
 
-// creating a mail server
+// creating a mail server for testing
 func (app *Config) createMail() Mail {
 	//create channels
 	errorChan := make(chan error)
@@ -93,14 +100,25 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	if msg.FromName == "" {
 		msg.FromName = m.FromName
 	}
+	if msg.AttachmentMap == nil {
+		msg.AttachmentMap = make(map[string]string)
+	}
 	//send info to the 2 templates
 
-	data := map[string]any{
-		//.message is called from the template and
-		//displays the message in the template
-		"message": msg.Data, //calls the interface data field
+	// data := map[string]any{
+	// 	//.message is called from the template and
+	// 	//displays the message in the template
+	// 	"message": msg.Data, //calls the interface data field
+	// }
+	// msg.DataMap = data
+
+	if len(msg.DataMap) == 0 {
+		msg.DataMap = make(map[string]any)
 	}
-	msg.DataMap = data
+	//.message is called from the template and
+	// 	//displays the message in the template
+	msg.DataMap["message"] = msg.Data //calls the key filed data and maps with a value interface
+
 	// build html mail
 	formattedMessage, err := m.buildHTMLMessage(msg)
 	if err != nil {
@@ -137,6 +155,11 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 			email.AddAttachment(x)
 		}
 	}
+	if len(msg.AttachmentMap) > 0 { //i.e if the map isn't empty
+		for key, value := range msg.AttachmentMap {
+			email.AddAttachment(value, key)
+		}
+	}
 	err = email.Send(smtpClient)
 	if err != nil {
 		errorChan <- err
@@ -148,6 +171,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.go.html", msg.Template) //display the name of the template called from the handlers
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
+
 	if err != nil {
 		return "", err
 	}
@@ -156,7 +180,6 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	if err = t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
 		return "", err
 	}
-
 	formattedMessage := tpl.String()
 	formattedMessage, err = m.inlineCSS(formattedMessage)
 	if err != nil {

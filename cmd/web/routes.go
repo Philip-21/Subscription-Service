@@ -20,14 +20,16 @@ func (app *Config) routes() http.Handler {
 
 	mux.Get("/login", app.Loginpage)
 	mux.Post("/login", app.PostLoginpage)
-	mux.Get("logout", app.Logout)
+	mux.Get("/logout", app.Logout)
 	mux.Get("/register", app.RegisterPage)
 	mux.Post("/register", app.PostRegisterPage)
 	mux.Get("/activate", app.ActivateAccount)
 
-	mux.Get("/plans", app.ChooseSubscription)
-	mux.Get("/subscribe", app.SubcribeToPlan)
-	//Sending Email Synchronously
+	//Mount attaches another http.Handler or chi Router as a subrouter along a routing
+	//attaches handlers for only authenticated users
+	mux.Mount("/members", app.authRouter())
+
+	//Sending Email Synchronously (not in use just for reference)
 	mux.Get("/test-mail", func(w http.ResponseWriter, r *http.Request) {
 		m := Mail{
 			Domain:      "localhost",
@@ -50,4 +52,14 @@ func (app *Config) routes() http.Handler {
 	})
 
 	return mux
+}
+
+func (app *Config) authRouter() http.Handler {
+	mux := chi.NewRouter()
+	mux.Use(app.Auth)
+
+	mux.Get("/plans", app.ChooseSubscription)
+	mux.Get("/subscribe", app.SubcribeToPlan)
+	return mux
+
 }

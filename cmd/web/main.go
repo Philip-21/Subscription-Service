@@ -43,12 +43,14 @@ func main() {
 
 	//set up application configurations
 	app := Config{
-		Session:  session,
-		DB:       db,
-		Wait:     &wg,
-		ErrorLog: errorLog,
-		InfoLog:  infoLog,
-		Models:   database.New(db),
+		Session:       session,
+		DB:            db,
+		Wait:          &wg,
+		ErrorLog:      errorLog,
+		InfoLog:       infoLog,
+		Models:        database.New(db),
+		ErrorChan:     make(chan error),
+		ErrorChanDone: make(chan bool),
 	}
 
 	//set up mail
@@ -58,6 +60,9 @@ func main() {
 
 	//listen for signals
 	go app.ListenForShutdown()
+
+	//listen for errors
+	go app.ListenForErrors()
 
 	//listen for web application
 	app.serve()
