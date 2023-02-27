@@ -32,7 +32,7 @@ type Message struct {
 	FromName      string
 	To            string
 	Subject       string
-	Attachments   string
+	Attachments   []string
 	AttachmentMap map[string]string
 	Data          any
 	DataMap       map[string]any
@@ -168,7 +168,7 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 }
 
 func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.go.html", msg.Template) //display the name of the template called from the handlers
+	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.gohtml", msg.Template) //display the name of the template called from the handlers
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
 
@@ -189,7 +189,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 }
 
 func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.go.html", msg.Template)
+	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
 
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
 	if err != nil {

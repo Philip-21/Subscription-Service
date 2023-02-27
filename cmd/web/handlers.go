@@ -15,11 +15,11 @@ import (
 )
 
 func (app *Config) homePage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "home.page.go.html", nil)
+	app.render(w, r, "home.page.gohtml", nil)
 }
 
 func (app *Config) Loginpage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "login.page.go.html", nil)
+	app.render(w, r, "login.page.gohtml", nil)
 }
 
 func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +77,7 @@ func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "register.page.go.html", nil)
+	app.render(w, r, "register.page.gohtml", nil)
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
@@ -281,7 +281,7 @@ func (app *Config) ChooseSubscription(w http.ResponseWriter, r *http.Request) {
 	//pass the var to the template
 	dataMap := make(map[string]any)
 	dataMap["plans"] = plans
-	app.render(w, r, "plans.page.go.html", &TemplateData{
+	app.render(w, r, "plans.page.gohtml", &TemplateData{
 		Data: dataMap,
 	})
 }
