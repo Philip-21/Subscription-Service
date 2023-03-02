@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: philippians
-      POSTGRES_DB: postgres
+      POSTGRES_DB: plans
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
 
