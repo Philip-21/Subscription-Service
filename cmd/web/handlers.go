@@ -103,9 +103,9 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	}
 	app.InfoLog.Println("User Registered")
 	// send an activation email
-	url := fmt.Sprintf("http://localhost/activate?email=%s", u.Email)
-	signedUrl := GenerateTokenFromString(url) //prevents url from being tampered
-	app.InfoLog.Println(signedUrl)
+	URL := fmt.Sprintf("http://localhost/activate?email=%s", u.Email)
+	signedURL := GenerateTokenFromString(URL) //prevents url from being tampered
+	app.InfoLog.Println(signedURL)
 	app.InfoLog.Println("Activation emailUrl Generated")
 
 	//create email message
@@ -113,7 +113,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		To:       u.Email,
 		Subject:  "Activate your account by verifying mail",
 		Template: "confirmation-email",
-		Data:     template.HTML(signedUrl), //cast the url into the html template
+		Data:     template.HTML(signedURL), //cast the url into the html template
 	}
 	app.sendemail(msg)
 	app.Session.Put(r.Context(), "flash", "Confirmation Mail Sent. Check your email to verify your mail.")
@@ -126,9 +126,9 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	app.InfoLog.Println("Activate Email Page gottten")
 	// validate url
-	url := r.RequestURI
-	testUrl := fmt.Sprintf("http://localhost%s", url)
-	okay := VerifyToken(testUrl) //the url with the hash appended to it
+	URL := r.RequestURI
+	testURL := fmt.Sprintf("http://localhost%s", URL)
+	okay := VerifyToken(testURL) //the url with the hash appended to it
 	if !okay {
 		app.Session.Put(r.Context(), "error", "invalid token")
 		app.ErrorLog.Println("invalid token")
@@ -144,7 +144,7 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.Active = 1
-	err = u.Update()
+	err = app.Models.User.Update(*u)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable User to update User.")
 		app.ErrorLog.Println("Unable to update user")
