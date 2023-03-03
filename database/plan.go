@@ -58,7 +58,8 @@ func (p *Plan) GetAll() ([]*Plan, error) {
 func (p *Plan) GetOne(id int) (*Plan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
-
+	//when user slects a plan the id in the plan db is saved into
+	//the user_plann db
 	query := `select id, plan_name, plan_amount, created_at, updated_at from plans where id = $1`
 
 	var plan Plan

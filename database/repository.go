@@ -18,6 +18,7 @@ type UserInterface interface {
 	Insert(user User) (int, error)
 	ResetPassword(password string) error
 	PasswordMatches(plainText string) (bool, error)
+	LoginUser(email string, password string) (*User, bool, string, error)
 }
 
 // PlanInterface is the type for the plan type. Both data.Plan and data.PlanTest
