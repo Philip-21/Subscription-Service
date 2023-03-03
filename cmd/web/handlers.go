@@ -35,20 +35,16 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
-	user, err := app.Models.User.GetByEmail(email)
+	user, loginValue, _, err := app.Models.User.LoginUser(email, password)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Invalid credentials.")
+		app.ErrorLog.Println("Invalid credentials")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	// check password
-	validPassword, err := user.PasswordMatches(password)
-	if err != nil {
-		app.Session.Put(r.Context(), "error", "Invalid credentials.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	if !validPassword {
+
+	if !loginValue {
+		app.ErrorLog.Println("Invalid Password", password)
 		msg := Message{
 			To:      email,
 			Subject: "Failed log in attempt",
@@ -65,7 +61,9 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 	app.Session.Put(r.Context(), "user", user)
 
 	app.Session.Put(r.Context(), "flash", "Successful login!")
+	app.InfoLog.Println("Succesful Login")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
 
 func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
@@ -271,7 +269,7 @@ func (app *Config) generateManual(u database.User, plan *database.Plan) *gofpdf.
 	return pdf
 }
 
-func (app *Config) ChooseSubscription(w http.ResponseWriter, r *http.Request) {
+func (app *Config) ChoosePlans(w http.ResponseWriter, r *http.Request) {
 	plans, err := app.Models.Plan.GetAll()
 	if err != nil {
 		app.ErrorLog.Println(err)
