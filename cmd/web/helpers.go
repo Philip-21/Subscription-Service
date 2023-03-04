@@ -62,3 +62,25 @@ func (app *Config) ListenForErrors() {
 		}
 	}
 }
+
+// creating a mail server for testing
+func (app *Config) createMail() Mail {
+	//create channels
+	errorChan := make(chan error)
+	mailerChan := make(chan Message, 100) //a buffered channel taking in 100messages before it locks
+	mailerDoneChan := make(chan bool)
+
+	m := Mail{
+		Domain:      "localhost",
+		Host:        "localhost",
+		Port:        1025,
+		Encryption:  "none",
+		FromAddress: "philip@company.com",
+		FromName:    "philip",
+		Wait:        app.Wait,
+		ErrorChan:   errorChan,
+		MailerChan:  mailerChan,
+		DoneChan:    mailerDoneChan,
+	}
+	return m
+}
