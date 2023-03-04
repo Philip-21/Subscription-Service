@@ -22,6 +22,8 @@ func (app *Config) serve() {
 	if err != nil {
 		log.Panic(err)
 	}
+	log.Println("Web Server Started")
+
 }
 
 func main() {
@@ -66,4 +68,5 @@ func main() {
 
 	//listen for web application
 	app.serve()
+
 }

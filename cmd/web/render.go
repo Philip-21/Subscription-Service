@@ -56,6 +56,7 @@ func (app *Config) render(w http.ResponseWriter, r *http.Request, t string, td *
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 }
 
 // describes the data in the template in reference to templatedata
@@ -64,6 +65,8 @@ func (app *Config) AddDefaultData(td *TemplateData, r *http.Request) *TemplateDa
 	td.Warning = app.Session.PopString(r.Context(), "warning")
 	td.Error = app.Session.PopString(r.Context(), "error")
 	if app.IsAuthenticated(r) {
+		//to display a page when a user is authenticated ,
+		//displays navbar template
 		td.Authenticated = true
 		// get more user information if authenticated and put in a session
 		user, ok := app.Session.Get(r.Context(), "user").(database.User)

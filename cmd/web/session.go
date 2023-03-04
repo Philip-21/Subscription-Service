@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/gob"
 	"net/http"
 	"os"
+	"subscription-service/database"
 	"time"
 
 	"github.com/alexedwards/scs/redisstore"
@@ -11,6 +13,7 @@ import (
 )
 
 func initSession() *scs.SessionManager {
+	gob.Register(database.User{}) //registers the struct to be used in the session
 	// set up session
 	session := scs.New()
 	//store info for every session in reddis
