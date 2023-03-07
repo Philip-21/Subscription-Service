@@ -22,6 +22,21 @@ func (app *Config) Loginpage(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "login.page.gohtml", nil)
 }
 
+func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
+	// clean up session
+	_ = app.Session.Destroy(r.Context())
+	_ = app.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "register.page.gohtml", nil)
+}
+
+func (app *Config) LandingPage(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "landing.page.gohtml", nil)
+}
 func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 	_ = app.Session.RenewToken(r.Context())
 
@@ -62,20 +77,8 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 
 	app.Session.Put(r.Context(), "flash", "Successful login!")
 	app.InfoLog.Println("Succesful Login")
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/members/landing", http.StatusSeeOther)
 
-}
-
-func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
-	// clean up session
-	_ = app.Session.Destroy(r.Context())
-	_ = app.Session.RenewToken(r.Context())
-
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
-}
-
-func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "register.page.gohtml", nil)
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +157,9 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	log.Println("Account Activated")
 }
 
+var pathToManual = "./pdf"
+var tempPath = "./temp"
+
 func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 	// get the id of the plan that is chosen
 	id := r.URL.Query().Get("id")
@@ -200,7 +206,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		defer app.Wait.Done()
 		pdf := app.generateManual(user, plan)
 		//write to a file
-		err := pdf.OutputFileAndClose(fmt.Sprintf("./tmp/%d_manual.pdf", user.ID))
+		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
 			return
@@ -211,7 +217,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 			Subject: "Your Manual",
 			Data:    "Your User Manual is attached",
 			AttachmentMap: map[string]string{
-				"Manual.pdf": fmt.Sprintf("./tmp/%d_manual.pdf", user.ID),
+				"Manual.pdf": fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID),
 			},
 		}
 		app.sendemail(msg)
@@ -250,7 +256,7 @@ func (app *Config) generateManual(u database.User, plan *database.Plan) *gofpdf.
 	importer := gofpdi.NewImporter()
 
 	time.Sleep(5 * time.Second)
-	t := importer.ImportPage(pdf, "./pdf/manual.pdf", 1, "/MediaBox")
+	t := importer.ImportPage(pdf, fmt.Sprintf("%s/manual.pdf", pathToManual), 1, "/MediaBox")
 	pdf.AddPage() //we have a page already
 
 	//use the imported template for the page
