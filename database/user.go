@@ -329,10 +329,34 @@ func (u *User) LoginUser(email string, password string) (*User, bool, string, er
 	var user User
 	//var hashedpassword string
 
-	row := db.QueryRowContext(ctx, "select id, password from users where email= $1", email)
+	query := `
+			select 
+			    id, 
+			    email, 
+			    first_name, 
+			    last_name, 
+			    password, 
+			    user_active, 
+			    is_admin, 
+			    created_at, 
+			    updated_at 
+			from 
+			    users 
+			where 
+			    email = $1`
+
+	row := db.QueryRowContext(ctx, query, email)
+	//row := db.QueryRowContext(ctx, "select id, password from users where email= $1", email)
 	err := row.Scan(
 		&user.ID,
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
 		&user.Password,
+		&user.Active,
+		&user.IsAdmin,
+		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		log.Println("invalid email")
@@ -346,14 +370,13 @@ func (u *User) LoginUser(email string, password string) (*User, bool, string, er
 		return nil, false, user.Password, errors.New("incorrect password")
 	} else if err != nil {
 		return nil, false, user.Password, err
-
 	}
 
 	/*
 		get plan if any ,joins the user id and plan id into when the user selects a plan
 		the user_plans table
 	*/
-	query := `select p.id, p.plan_name, p.plan_amount, p.created_at, p.updated_at from 
+	query = `select p.id, p.plan_name, p.plan_amount, p.created_at, p.updated_at from
 			plans p
 			left join user_plans up on (p.id = up.plan_id)
 			where up.user_id = $1`
