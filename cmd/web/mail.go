@@ -105,10 +105,10 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 		errorChan <- err
 	}
 	// build plain text mail
-	plainMessage, err := m.buildPlainTextMessage(msg)
-	if err != nil {
-		errorChan <- err
-	}
+	// plainMessage, err := m.buildPlainTextMessage(msg)
+	// if err != nil {
+	// 	errorChan <- err
+	// }
 	server := mail.NewSMTPClient()
 	server.Host = m.Host
 	server.Port = m.Port
@@ -126,7 +126,7 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	email := mail.NewMSG()
 	email.SetFrom(msg.From).AddTo(msg.To).SetSubject(msg.Subject)
 
-	email.SetBody(mail.TextPlain, plainMessage)
+	//email.SetBody(mail.TextPlain, plainMessage)
 	email.AddAlternative(mail.TextHTML, formattedMessage)
 
 	if len(msg.Attachments) > 0 {
@@ -167,21 +167,21 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	return formattedMessage, nil
 }
 
-func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
+// func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
+// 	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
 
-	t, err := template.New("email-plain").ParseFiles(templateToRender)
-	if err != nil {
-		return "", err
-	}
-	var tpl bytes.Buffer
-	if err = t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
-		return "", err
-	}
-	plainMessage := tpl.String()
+// 	t, err := template.New("email-plain").ParseFiles(templateToRender)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	var tpl bytes.Buffer
+// 	if err = t.ExecuteTemplate(&tpl, "body", msg.DataMap); err != nil {
+// 		return "", err
+// 	}
+// 	plainMessage := tpl.String()
 
-	return plainMessage, nil
-}
+// 	return plainMessage, nil
+// }
 
 func (m *Mail) inlineCSS(s string) (string, error) {
 	options := premailer.Options{
