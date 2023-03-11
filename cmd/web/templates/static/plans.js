@@ -1,5 +1,5 @@
 function selectPlan(x, plan) {
-      //sweet allert fires a dialogue box
+      //sweet alert fires a dialogue box.
       Swal.fire({
           title: 'Subscribe',
           html: 'Are you sure you want to subscribe to the ' + plan + '?',
