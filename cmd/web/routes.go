@@ -34,28 +34,6 @@ func (app *Config) routes() http.Handler {
 	//attaches handlers for only authenticated users
 	mux.Mount("/members", app.authRouter())
 
-	//Sending Email Synchronously (not in use just for reference)
-	// mux.Get("/test-mail", func(w http.ResponseWriter, r *http.Request) {
-	// 	m := Mail{
-	// 		Domain:      "localhost",
-	// 		Host:        "localhost",
-	// 		Port:        1025,
-	// 		Encryption:  "none",
-	// 		FromAddress: "philip@company.com",
-	// 		FromName:    "philip",
-	// 		//make an error chan
-	// 		ErrorChan: make(chan error),
-	// 	}
-
-	// 	msg := Message{
-	// 		To:      "me@here.com",
-	// 		Subject: "testing mail service",
-	// 		Data:    "Hello World",
-	// 	}
-	// 	//sending email
-	// 	m.SendMail(msg, make(chan error))
-	// })
-
 	return mux
 }
 
@@ -63,6 +41,7 @@ func (app *Config) authRouter() http.Handler {
 	mux := chi.NewRouter()
 	mux.Use(app.Auth)
 
+	mux.Get("/landing", app.LandingPage)
 	mux.Get("/plans", app.ChoosePlans)
 	mux.Get("/subscribe", app.SubcribeToPlan)
 	return mux

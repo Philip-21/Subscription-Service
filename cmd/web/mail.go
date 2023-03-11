@@ -27,6 +27,7 @@ type Mail struct {
 	DoneChan    chan bool
 }
 
+// items to be sent to clients mail
 type Message struct {
 	From          string
 	FromName      string
@@ -43,10 +44,14 @@ type Message struct {
 func (app *Config) sendemail(msg Message) {
 	//add counter to waitgroup , increment wg by 1
 	app.Wait.Add(1)
-	app.Mailer.MailerChan <- msg //send message to the mail channel(speaks to the MailerChan object in the config struct which will be accessed by any of the handlers)
+	//send message to the Mail channel(speaks to the MailerChan object in the Mail
+	//struct which will be accessed by any of the handlers)
+	app.Mailer.MailerChan <- msg
 }
 
-// a func a listen for messages on the mailerChan
+// a func that listens for different channels
+// described in the Channel objects
+// in the Mail struct
 func (app *Config) ListenForMail() {
 	//listen to diff channels
 	for {

@@ -37,50 +37,6 @@ func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
 func (app *Config) LandingPage(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "landing.page.gohtml", nil)
 }
-func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
-	_ = app.Session.RenewToken(r.Context())
-
-	// parse form post
-	err := r.ParseForm()
-	if err != nil {
-		app.ErrorLog.Println(err)
-	}
-
-	// get email and password from form post
-	email := r.Form.Get("email")
-	password := r.Form.Get("password")
-
-	user, loginValue, _, err := app.Models.User.LoginUser(email, password)
-	if err != nil {
-		app.Session.Put(r.Context(), "error", "Invalid credentials.")
-		app.ErrorLog.Println("Invalid credentials")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	if !loginValue {
-		app.ErrorLog.Println("Invalid Password", password)
-		msg := Message{
-			To:      email,
-			Subject: "Failed log in attempt",
-			Data:    "Invalid Login ",
-		}
-		//call the channel func that sends email message easily
-		app.sendemail(msg) //the app.Mailer.MailerChan which is a reciever from the message struct communictes this message sent to the
-		//creating a session
-		app.Session.Put(r.Context(), "error", "Invalid credentials.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	app.Session.Put(r.Context(), "userID", user.ID)
-	app.Session.Put(r.Context(), "user", user)
-
-	app.Session.Put(r.Context(), "flash", "Successful login!")
-	app.InfoLog.Println("Succesful Login")
-	http.Redirect(w, r, "/members/landing", http.StatusSeeOther)
-
-}
-
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -157,6 +113,50 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	log.Println("Account Activated")
 }
 
+func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
+	_ = app.Session.RenewToken(r.Context())
+
+	// parse form post
+	err := r.ParseForm()
+	if err != nil {
+		app.ErrorLog.Println(err)
+	}
+
+	// get email and password from form post
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	user, loginValue, _, err := app.Models.User.LoginUser(email, password)
+	if err != nil {
+		app.Session.Put(r.Context(), "error", "Invalid credentials.")
+		app.ErrorLog.Println("Invalid credentials")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if !loginValue {
+		app.ErrorLog.Println("Invalid Password", password)
+		msg := Message{
+			To:      email,
+			Subject: "Failed log in attempt",
+			Data:    "Invalid Login ",
+		}
+		//call the channel func that sends email message easily
+		app.sendemail(msg) //the app.Mailer.MailerChan which is a reciever from the message struct communictes this message sent to the
+		//creating a session
+		app.Session.Put(r.Context(), "error", "Invalid credentials.")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+	app.Session.Put(r.Context(), "userID", user.ID)
+	app.Session.Put(r.Context(), "user", user)
+
+	app.Session.Put(r.Context(), "flash", "Successful login!")
+	app.InfoLog.Println("Succesful Login")
+	http.Redirect(w, r, "/members/landing", http.StatusSeeOther)
+
+}
+
 var pathToManual = "./pdf"
 var tempPath = "./temp"
 
@@ -182,7 +182,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	// generate an invoice ane email in it
+	// generate an invoice and email in it
 	app.Wait.Add(1)
 	go func() {
 		defer app.Wait.Done() //decrement waitgroup
@@ -191,6 +191,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.ErrorChan <- err
 		}
+		app.InfoLog.Println("Invoice Generated")
 		//send an email
 		msg := Message{
 			To:       user.Email,
@@ -199,18 +200,21 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 			Template: "invoice",
 		}
 		app.sendemail(msg)
+		app.InfoLog.Println("Invoice Sent to Email")
 	}()
+
 	// generate a manual
 	app.Wait.Add(1)
 	go func() {
 		defer app.Wait.Done()
 		pdf := app.generateManual(user, plan)
 		//write to a file
-		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID))
+		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", pathToManual, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
 			return
 		}
+		app.InfoLog.Println("Manual Generated")
 		// send an email with the manual attached
 		msg := Message{
 			To:      user.Email,
@@ -221,6 +225,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 		app.sendemail(msg)
+		app.InfoLog.Println("Manual sent to email")
 		//test error chan
 		app.ErrorChan <- errors.New("Some Custom Error")
 	}()
@@ -228,6 +233,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 	err = app.Models.Plan.SubscribeUserToPlan(user, *plan)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Error Subscribing to Plan")
+		app.ErrorLog.Println("Error in Subscribing to Plan")
 		http.Redirect(w, r, "/members/plans", http.StatusSeeOther)
 		return
 	}
@@ -235,6 +241,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 	u, err := app.Models.User.GetOne(user.ID)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Error Getting User From Database")
+		app.ErrorLog.Println("Error in getting User from db")
 		http.Redirect(w, r, "/members/plans", http.StatusSeeOther)
 		return
 	}
