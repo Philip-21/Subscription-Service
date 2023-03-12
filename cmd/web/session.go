@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"fmt"
 	"net/http"
 	"os"
 	"subscription-service/database"
@@ -10,6 +11,7 @@ import (
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/gomodule/redigo/redis"
+	"github.com/joho/godotenv"
 )
 
 func initSession() *scs.SessionManager {
@@ -27,11 +29,17 @@ func initSession() *scs.SessionManager {
 }
 
 func initRedis() *redis.Pool {
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error in loading env file ", err)
+	}
+	conn := os.Getenv("REDIS")
+
 	redisPool := &redis.Pool{
 		MaxIdle: 10,
 		//dial a redis server
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", os.Getenv("REDIS"))
+			return redis.Dial("tcp", conn)
 		},
 	}
 

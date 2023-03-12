@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -37,6 +36,7 @@ func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
 func (app *Config) LandingPage(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "landing.page.gohtml", nil)
 }
+
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -212,6 +212,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", pathToManual, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
+			app.ErrorLog.Println("error in generating Manual", err)
 			return
 		}
 		app.InfoLog.Println("Manual Generated")
@@ -226,8 +227,6 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		}
 		app.sendemail(msg)
 		app.InfoLog.Println("Manual sent to email")
-		//test error chan
-		app.ErrorChan <- errors.New("Some Custom Error")
 	}()
 	// subscribe the user to an account
 	err = app.Models.Plan.SubscribeUserToPlan(user, *plan)
