@@ -1,2 +1,2 @@
-./db-data/postgres
-./db-data/redis
+db-data/
+.env
