@@ -41,7 +41,7 @@ func (p *Plan) GetAll() ([]*Plan, error) {
 			&plan.CreatedAt,
 			&plan.UpdatedAt,
 		)
-
+		//Puts A currency format
 		plan.PlanAmountFormatted = plan.AmountForDisplay()
 		if err != nil {
 			log.Println("Error scanning", err)

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -9,6 +10,7 @@ import (
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/joho/godotenv"
 )
 
 func InitDB() *sql.DB {
@@ -21,7 +23,13 @@ func InitDB() *sql.DB {
 
 func connectToDB() *sql.DB {
 	counts := 0
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	dsn := os.Getenv("DSN")
+	fmt.Println(dsn)
 
 	for {
 		connection, err := openDB(dsn)
