@@ -44,8 +44,10 @@ type Message struct {
 func (app *Config) sendemail(msg Message) {
 	//add counter to waitgroup , increment wg by 1
 	app.Wait.Add(1)
-	//send message to the Mail channel(speaks to the MailerChan object in the Mail
-	//struct which will be accessed by any of the handlers)
+	/*
+		send message to the Mail channel(speaks to the MailerChan object in the Mail
+		struct which will be accessed by any of the handlers)
+	*/
 	app.Mailer.MailerChan <- msg
 }
 
@@ -69,6 +71,8 @@ func (app *Config) ListenForMail() {
 
 }
 
+// Displays the email message
+// Displays the email sent by the goroutine from the ListenForMail()
 func (m *Mail) SendMail(msg Message, errorChan chan error) {
 	//decrement wait group
 	defer m.Wait.Done()
