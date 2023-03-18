@@ -52,7 +52,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		Active:  0,
 		IsAdmin: 0,
 	}
-	_, err = u.Insert(u)
+	_, err = app.Models.User.Insert(u)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable to create a user")
 		app.ErrorLog.Println("Unable to Create user")
@@ -63,6 +63,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	URL := fmt.Sprintf("http://localhost/activate?email=%s", u.Email)
 	signedURL := GenerateTokenFromString(URL) //prevents url from being tampered
 	app.InfoLog.Println(signedURL)
+
 	app.InfoLog.Println("Activation emailUrl Generated")
 
 	//create email message
@@ -196,7 +197,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		msg := Message{
 			To:       user.Email,
 			Subject:  "Your Invoice",
-			Data:     invoice,
+			Data:     invoice, //displays the amount
 			Template: "invoice",
 		}
 		app.sendemail(msg)
@@ -207,9 +208,13 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 	app.Wait.Add(1)
 	go func() {
 		defer app.Wait.Done()
-		pdf := app.generateManual(user, plan)
+		pdf, err := app.generateManual(user, plan)
+		if err != nil {
+			app.ErrorChan <- err
+			app.ErrorLog.Println("Error in Generating Manual", err)
+		}
 		//write to a file
-		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", pathToManual, user.ID))
+		err = pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
 			app.ErrorLog.Println("error in generating Manual", err)
@@ -255,16 +260,15 @@ func (app *Config) getInvoice(u database.User, plan *database.Plan) (string, err
 	return plan.PlanAmountFormatted, nil //returns the price of the plan
 }
 
-func (app *Config) generateManual(u database.User, plan *database.Plan) *gofpdf.Fpdf {
-	pdf := gofpdf.New("p", "mm", "Letter", "")
+func (app *Config) generateManual(u database.User, plan *database.Plan) (*gofpdf.Fpdf, error) {
+	pdf := gofpdf.New("P", "mm", "Letter", "")
 	pdf.SetMargins(10, 13, 10)
 
 	importer := gofpdi.NewImporter()
-
 	time.Sleep(5 * time.Second)
+
 	t := importer.ImportPage(pdf, fmt.Sprintf("%s/manual.pdf", pathToManual), 1, "/MediaBox")
 	pdf.AddPage() //we have a page already
-
 	//use the imported template for the page
 	importer.UseImportedTemplate(pdf, t, 0, 0, 215.9, 0)
 	//set x and y coordinates
@@ -278,7 +282,7 @@ func (app *Config) generateManual(u database.User, plan *database.Plan) *gofpdf.
 	//a cell that may span multiple linebreaks
 	pdf.MultiCell(0, 4, fmt.Sprintf("%s User Guide", plan.PlanName), "", "C", false)
 
-	return pdf
+	return pdf, nil
 }
 
 func (app *Config) ChoosePlans(w http.ResponseWriter, r *http.Request) {
