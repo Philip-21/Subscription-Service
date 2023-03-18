@@ -6,6 +6,7 @@ function selectPlan(x, plan) {
           showCancelButton: true,
           confirmButtonText: 'Subscribe',
       }).then((result) => {
+        //the click action calls the subcribe to plan handler in the backend
           if (result.isConfirmed) {
               window.location.href = '/members/subscribe?id=' + x;
           }

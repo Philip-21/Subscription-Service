@@ -159,7 +159,7 @@ func (app *Config) PostLoginpage(w http.ResponseWriter, r *http.Request) {
 }
 
 var pathToManual = "./pdf"
-var tempPath = "./temp"
+var tmpPath = "./temp"
 
 func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 	// get the id of the plan that is chosen
@@ -214,7 +214,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 			app.ErrorLog.Println("Error in Generating Manual", err)
 		}
 		//write to a file
-		err = pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID))
+		err = pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tmpPath, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
 			app.ErrorLog.Println("error in generating Manual", err)
@@ -227,7 +227,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 			Subject: "Your Manual",
 			Data:    "Your User Manual is attached",
 			AttachmentMap: map[string]string{
-				"Manual.pdf": fmt.Sprintf("%s/%d_manual.pdf", tempPath, user.ID),
+				"Manual.pdf": fmt.Sprintf("%s/%d_manual.pdf", tmpPath, user.ID),
 			},
 		}
 		app.sendemail(msg)
