@@ -30,7 +30,7 @@ func (app *Config) ListenForShutdown() {
 }
 
 /*
-Shutdown() method is responsible for performing any necessary
+Shutdown() is responsible for performing any necessary
 cleanup tasks and waiting for all running goroutines to complete
 */
 func (app *Config) Shutdown() {

@@ -91,20 +91,12 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 		msg.AttachmentMap = make(map[string]string)
 	}
 	//send info to the 2 templates
-
-	// data := map[string]any{
-	// 	//.message is called from the template and
-	// 	//displays the message in the template
-	// 	"message": msg.Data, //calls the interface data field
-	// }
-	// msg.DataMap = data
-
 	if len(msg.DataMap) == 0 {
 		msg.DataMap = make(map[string]any)
 	}
 	//.message is called from the template and
-	// 	//displays the message in the template
-	msg.DataMap["message"] = msg.Data //calls the key filed data and maps with a value interface
+	//displays the message in the template
+	msg.DataMap["message"] = msg.Data //calls the key field data and maps with a value interface
 
 	// build html mail
 	formattedMessage, err := m.buildHTMLMessage(msg)
@@ -142,7 +134,8 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 			email.AddAttachment(x)
 		}
 	}
-	if len(msg.AttachmentMap) > 0 { //i.e if the map isn't empty
+	//i.e if the map isn't empty
+	if len(msg.AttachmentMap) > 0 {
 		for key, value := range msg.AttachmentMap {
 			email.AddAttachment(value, key)
 		}
