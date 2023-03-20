@@ -52,7 +52,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		Active:  0,
 		IsAdmin: 0,
 	}
-	_, err = app.Models.User.Insert(u)
+	_, err = u.Insert(u)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable to create a user")
 		app.ErrorLog.Println("Unable to Create user")
@@ -203,6 +203,7 @@ func (app *Config) SubcribeToPlan(w http.ResponseWriter, r *http.Request) {
 		app.sendemail(msg)
 		app.InfoLog.Println("Invoice Sent to Email")
 	}()
+	app.Wait.Wait()
 
 	// generate a manual
 	app.Wait.Add(1)
