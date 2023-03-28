@@ -40,28 +40,6 @@ type Message struct {
 	Template      string
 }
 
-// creating a mail server for testing in production
-func (app *Config) createMail() Mail {
-	//create channels
-	errorChan := make(chan error)
-	mailerChan := make(chan Message, 100) //a buffered channel taking in 100messages before it locks
-	mailerDoneChan := make(chan bool)
-
-	m := Mail{
-		Domain:      "localhost",
-		Host:        "localhost",
-		Port:        1025,
-		Encryption:  "none",
-		FromAddress: "philip@company.com",
-		FromName:    "philip",
-		Wait:        app.Wait,
-		ErrorChan:   errorChan,
-		MailerChan:  mailerChan,
-		DoneChan:    mailerDoneChan,
-	}
-	return m
-}
-
 // a  helper wrapper to send email easily
 func (app *Config) sendemail(msg Message) {
 	//add counter to waitgroup , increment wg by 1
@@ -132,14 +110,14 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 		errorChan <- err
 	}
 	server := mail.NewSMTPClient()
-	server.Host = "smpt.gmail.com"
-	server.Port = 587
-	server.Username = "your-gmail-username"
-	server.Password = "you-gmail-password"
-	// server.Host = m.Host
-	// server.Port = m.Port
-	// server.Username = m.Username
-	// server.Password = m.Password
+	// server.Host = "smpt.gmail.com"
+	// server.Port = 587
+	// server.Username = "your-gmail-username"
+	// server.Password = "you-gmail-password"
+	server.Host = m.Host
+	server.Port = m.Port
+	server.Username = m.Username
+	server.Password = m.Password
 	server.Encryption = m.getEncryption(m.Encryption)
 	server.KeepAlive = false
 	server.ConnectTimeout = 10 * time.Second
