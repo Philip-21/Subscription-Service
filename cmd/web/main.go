@@ -7,6 +7,7 @@ import (
 	"os"
 	"subscription-service/database"
 	"sync"
+	"time"
 )
 
 const webPort = "80"
@@ -30,6 +31,64 @@ func main() {
 
 	//connect to db
 	db := database.InitDB()
+
+	//seeding actions
+	err1 := database.Users(db)
+	if err1 != nil {
+		log.Printf("%s Couldnt seed Users table", err1)
+		return
+	}
+	err2 := database.Plans(db)
+	if err2 != nil {
+		log.Printf("%s Couldnt seed plans table", err2)
+		return
+	}
+	err3 := database.User_Plans(db)
+	if err3 != nil {
+		log.Printf("%s Couldnt Seed User-plans table ", err3)
+		return
+	}
+	err4 := database.Altertable(db)
+	if err4 != nil {
+		log.Printf("%s couldnt alter user-plan table", err4)
+		return
+	}
+	p := database.Plan{
+		ID:         1,
+		PlanName:   "Bronze Plan",
+		PlanAmount: 50,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+	m := database.Plan{
+		ID:         2,
+		PlanName:   "Silver Plan",
+		PlanAmount: 100,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+	t := database.Plan{
+		ID:         3,
+		PlanName:   "Gold Plan",
+		PlanAmount: 1000,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+	}
+	err1 = database.SeedUserPlans(db, &p)
+	if err1 != nil {
+		log.Printf("Error %s in Inserting Item in plan table", err1)
+		return
+	}
+	err2 = database.SeedUserPlans(db, &m)
+	if err2 != nil {
+		log.Printf("Error %s in Inserting Item in Plan table", err2)
+		return
+	}
+	err3 = database.SeedUserPlans(db, &t)
+	if err3 != nil {
+		log.Printf("Error %s in Inserting Item in Plan table", err3)
+		return
+	}
 
 	//create loggers
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -61,7 +120,7 @@ func main() {
 	go app.ListenForMail()
 
 	//listen for signals
-	go app.ListenForShutdown()
+	//go app.ListenForShutdown()
 
 	//listen for errors
 	go app.ListenForErrors()
