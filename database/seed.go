@@ -9,9 +9,10 @@ import (
 
 func Users(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS users(
-		id Serial Primary key,
-		first_name character varying(225) NOT NULL,
-		last_name character varying(225) NOT NULL,
+		id Serial primary key,
+		email character varying(255) NOT NULL,
+		first_name character varying(255) NOT NULL,
+		last_name character varying(255) NOT NULL,
 		password character varying(60) NOT NULL,
 		user_active int ,
 		is_admin int,
@@ -64,10 +65,10 @@ func User_Plans(db *sql.DB) error {
 func Plans(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS plans(
 		id Serial primary key,
-		plan_name character varying(225) NOT NULL,
-		plan_amount int NOT NULL
+		plan_name character varying(255) NOT NULL,
+		plan_amount int NOT NULL,
 		created_at timestamp(6) NOT NULL, 
-		updated_at timestamp(6) NOT NULL,
+		updated_at timestamp(6) NOT NULL
 		
 	)`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -91,7 +92,7 @@ func Plans(db *sql.DB) error {
 func Altertable(db *sql.DB) error {
 	query := `ALTER TABLE user_plans ADD FOREIGN KEY (user_id) REFERENCES users(id);
 	          ALTER TABLE user_plans ADD FOREIGN KEY (plan_id) REFERENCES plans(id)`
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	alter, err := db.ExecContext(ctx, query)
@@ -133,7 +134,7 @@ func SeedUserPlans(db *sql.DB, p *Plan) error {
 		log.Printf("Error %s when finding rows affected", err)
 		return err
 	}
-	log.Printf("%d rooms created ", rows)
+	log.Printf("%d plan created ", rows)
 	return nil
 
 }
