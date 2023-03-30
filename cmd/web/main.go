@@ -56,21 +56,21 @@ func main() {
 	p := database.Plan{
 		ID:         1,
 		PlanName:   "Bronze Plan",
-		PlanAmount: 50,
+		PlanAmount: 5000,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
 	m := database.Plan{
 		ID:         2,
 		PlanName:   "Silver Plan",
-		PlanAmount: 100,
+		PlanAmount: 20000,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
 	t := database.Plan{
 		ID:         3,
 		PlanName:   "Gold Plan",
-		PlanAmount: 1000,
+		PlanAmount: 100000,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
