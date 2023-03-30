@@ -14,8 +14,8 @@ func Users(db *sql.DB) error {
 		first_name character varying(255) NOT NULL,
 		last_name character varying(255) NOT NULL,
 		password character varying(60) NOT NULL,
-		user_active int ,
-		is_admin int,
+		user_active int DEFAULT 0,
+		is_admin int DEFAULT 0,
 		created_at timestamp(6) NOT NULL, 
 		updated_at timestamp(6) NOT NULL
 	)`
@@ -58,7 +58,7 @@ func User_Plans(db *sql.DB) error {
 		log.Printf("Error %s when geting rows affected", err)
 		return err
 	}
-	log.Println("Plans Table Created")
+	log.Println("User-Plans Table Created")
 	return nil
 }
 
@@ -76,7 +76,7 @@ func Plans(db *sql.DB) error {
 
 	plan, err := db.ExecContext(ctx, query)
 	if err != nil {
-		log.Printf("Error %s in creating User-Plans table", err)
+		log.Printf("Error %s in creating Plans table", err)
 		return err
 	}
 	_, err = plan.RowsAffected()
@@ -84,7 +84,7 @@ func Plans(db *sql.DB) error {
 		log.Printf("Error %s when geting rows affected", err)
 		return err
 	}
-	log.Println("User-Plan Table Created")
+	log.Println("Plans Table Created")
 	return nil
 
 }
@@ -129,12 +129,12 @@ func SeedUserPlans(db *sql.DB, p *Plan) error {
 		log.Println("seeding db affected")
 		return err
 	}
-	rows, err := res.RowsAffected()
+	_, err = res.RowsAffected()
 	if err != nil {
 		log.Printf("Error %s when finding rows affected", err)
 		return err
 	}
-	log.Printf("%d plan created ", rows)
+	log.Println("plan value inserted")
 	return nil
 
 }
