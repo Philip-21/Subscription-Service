@@ -3,17 +3,7 @@ version: '3'
 services:
 
   #  start Postgres, and ensure that data is stored to a mounted volume
-  postgres:
-    image: 'postgres:14.2-alpine'
-    ports:
-      - "5432:5432"
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: philippians
-      POSTGRES_DB: plans
-    volumes:
-      - ./db-data/postgres/:/var/lib/postgresql/data/
+ 
 
   #  start Redis, and ensure that data is stored to a mounted volume
   redis:
