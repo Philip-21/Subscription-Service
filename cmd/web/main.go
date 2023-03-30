@@ -120,7 +120,7 @@ func main() {
 	go app.ListenForMail()
 
 	//listen for signals
-	//go app.ListenForShutdown()
+	go app.ListenForShutdown()
 
 	//listen for errors
 	go app.ListenForErrors()
