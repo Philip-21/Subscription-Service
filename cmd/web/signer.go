@@ -2,20 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strings"
 	"time"
 
 	goalone "github.com/bwmarrin/go-alone" //generates signed texts
+	"github.com/joho/godotenv"
 )
 
 // The signed text generated will be used in the Url which will be used
 // in the email to activate the account
-const secret = "abc123abc123abc123"
 
 var secretKey []byte
 
 // NewURLSigner creates a new signer
 func NewURLSigner() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("error in loading env file for Secret", err)
+	}
+	secret := os.Getenv("Activation")
 	secretKey = []byte(secret)
 }
 
