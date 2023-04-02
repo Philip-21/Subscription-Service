@@ -1,7 +1,7 @@
 {
       "dependencies": [
         {"name": "golang", "version": "1.20"},
-        {"name": "my-go-app", "path": "./cmd/web", "buildInputs": ["golang"], "buildCommand": "go build -o my-go-app", "runCommand": "./my-go-app", "configureFlags": ["--enable-cgo"]}
+        {"name": "my-go-app", "path": "./cmd/web", "buildInputs": ["golang"], "buildCommand": "go build my-go-app", "runCommand": "./my-go-app", "configureFlags": ["--enable-cgo"]}
       ],
       "prebuild":["go get -d ./cmd/web/..."]
     }
