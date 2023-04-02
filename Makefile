@@ -1,4 +1,4 @@
-BINARY_NAME=myapp.exe
+BINARY_NAME=my-go-app.exe
 DSN="host=localhost port=5432 user=postgres password=philippians dbname=plans sslmode=disable timezone=UTC connect_timeout=5"
 REDIS="127.0.0.1:6379"
 
