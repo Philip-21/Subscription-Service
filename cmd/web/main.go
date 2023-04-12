@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const webPort = "8080"
+const webPort = "80"
 
 func (app *Config) serve() {
 	//start http server

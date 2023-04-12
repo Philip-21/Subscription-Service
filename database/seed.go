@@ -8,7 +8,7 @@ import (
 )
 
 func Users(db *sql.DB) error {
-	query := `CREATE TABLE IF NOT EXISTS subscription_subscription_users(
+	query := `CREATE TABLE IF NOT EXISTS subscription_users(
 		id Serial primary key,
 		email character varying(255) NOT NULL,
 		first_name character varying(255) NOT NULL,

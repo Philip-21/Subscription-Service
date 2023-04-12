@@ -17,8 +17,9 @@ import (
 var secretKey []byte
 
 // NewURLSigner creates a new signer
+
 func NewURLSigner() {
-	err := godotenv.Load("app.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("error in loading env file for Secret", err)
 	}
@@ -49,6 +50,7 @@ func VerifyToken(token string) bool {
 	_, err := s.Unsign([]byte(token))
 
 	if err != nil {
+		log.Println("Inavlid Signature , tampered signature or forged signature")
 		// signature is not valid. Token was tampered with, forged, or maybe it's
 		// not even a token at all! Either way, it's not safe to use it.
 		return false
