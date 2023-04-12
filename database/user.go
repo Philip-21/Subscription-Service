@@ -40,7 +40,7 @@ func (u *User) GetAll() ([]*User, error) {
        	created_at, 
        	updated_at
 	from 
-	    users 
+	    subscription_users 
 	order by 
 	    last_name`
 
@@ -93,7 +93,7 @@ func (u *User) GetByEmail(email string) (*User, error) {
 			    created_at, 
 			    updated_at 
 			from 
-			    users 
+			    subscription_users 
 			where 
 			    email = $1`
 
@@ -146,7 +146,7 @@ func (u *User) GetOne(id int) (*User, error) {
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, is_admin, created_at, updated_at 
-				from users 
+				from subscription_users 
 				where id = $1`
 
 	var user User
@@ -201,7 +201,7 @@ func (u *User) Update(user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	stmt := `update users set
+	stmt := `update subscription_users set
 		email = $1,
 		first_name = $2,
 		last_name = $3,
@@ -230,7 +230,7 @@ func (u *User) Delete() error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	stmt := `delete from users where id = $1`
+	stmt := `delete from subscription_users where id = $1`
 
 	_, err := db.ExecContext(ctx, stmt, u.ID)
 	if err != nil {
@@ -245,7 +245,7 @@ func (u *User) DeleteByID(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	stmt := `delete from users where id = $1`
+	stmt := `delete from subscription_users where id = $1`
 
 	_, err := db.ExecContext(ctx, stmt, id)
 	if err != nil {
@@ -266,7 +266,7 @@ func (u *User) Insert(user User) (int, error) {
 	}
 
 	var newID int
-	stmt := `insert into users (email, first_name, last_name, password, user_active, created_at, updated_at)
+	stmt := `insert into subscription_users (email, first_name, last_name, password, user_active, created_at, updated_at)
 		values ($1, $2, $3, $4, $5, $6, $7) returning id`
 
 	err = db.QueryRowContext(ctx, stmt,
@@ -296,7 +296,7 @@ func (u *User) ResetPassword(password string) error {
 		return err
 	}
 
-	stmt := `update users set password = $1 where id = $2`
+	stmt := `update subscription_users set password = $1 where id = $2`
 	_, err = db.ExecContext(ctx, stmt, hashedPassword, u.ID)
 	if err != nil {
 		return err
@@ -341,12 +341,12 @@ func (u *User) LoginUser(email string, password string) (*User, bool, string, er
 			    created_at, 
 			    updated_at 
 			from 
-			    users 
+			    subscription_users 
 			where 
 			    email = $1`
 
 	row := db.QueryRowContext(ctx, query, email)
-	//row := db.QueryRowContext(ctx, "select id, password from users where email= $1", email)
+	//row := db.QueryRowContext(ctx, "select id, password from subscription_users where email= $1", email)
 	err := row.Scan(
 		&user.ID,
 		&user.Email,

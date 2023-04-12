@@ -8,7 +8,7 @@ import (
 )
 
 func Users(db *sql.DB) error {
-	query := `CREATE TABLE IF NOT EXISTS users(
+	query := `CREATE TABLE IF NOT EXISTS subscription_subscription_users(
 		id Serial primary key,
 		email character varying(255) NOT NULL,
 		first_name character varying(255) NOT NULL,
@@ -24,7 +24,7 @@ func Users(db *sql.DB) error {
 
 	res, err := db.ExecContext(ctx, query)
 	if err != nil {
-		log.Printf("Error %s in Creating Users Table", err)
+		log.Printf("Error %s in Creating subscription_users Table", err)
 		return err
 	}
 	_, err = res.RowsAffected()
@@ -32,7 +32,7 @@ func Users(db *sql.DB) error {
 		log.Printf("Error %s when getting rows affected", err)
 		return err
 	}
-	log.Println("users Table Created")
+	log.Println("subscription_users Table Created")
 	return nil
 }
 
@@ -90,7 +90,7 @@ func Plans(db *sql.DB) error {
 }
 
 func Altertable(db *sql.DB) error {
-	query := `ALTER TABLE user_plans ADD FOREIGN KEY (user_id) REFERENCES users(id);
+	query := `ALTER TABLE user_plans ADD FOREIGN KEY (user_id) REFERENCES subscription_users(id);
 	          ALTER TABLE user_plans ADD FOREIGN KEY (plan_id) REFERENCES plans(id)`
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
