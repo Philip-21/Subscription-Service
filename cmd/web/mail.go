@@ -110,14 +110,14 @@ func (m *Mail) SendMail(msg Message, errorChan chan error) {
 		errorChan <- err
 	}
 	server := mail.NewSMTPClient()
-	// server.Host = "smtp.gmail.com"
-	// server.Port = 587
-	// server.Username = m.Username
-	// server.Password = m.Password
-	server.Host = m.Host
-	server.Port = m.Port
+	server.Host = "smtp.gmail.com"
+	server.Port = 587
 	server.Username = m.Username
 	server.Password = m.Password
+	// server.Host = m.Host
+	// server.Port = m.Port
+	// server.Username = m.Username
+	// server.Password = m.Password
 	server.Encryption = m.getEncryption(m.Encryption)
 	server.KeepAlive = false
 	server.ConnectTimeout = 10 * time.Second
