@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const webPort = "80"
+const webPort = "8080"
 
 func (app *Config) serve() {
 	//start http server
@@ -21,9 +21,9 @@ func (app *Config) serve() {
 	app.InfoLog.Println("Starting web server......")
 	err := srv.ListenAndServe()
 	if err != nil {
-		log.Panic(err)
+		app.ErrorLog.Panic("error in starting web server",err)
 	}
-	log.Println("Web Server Started")
+	app.InfoLog.Println("Web Server Started")
 
 }
 
