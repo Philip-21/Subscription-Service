@@ -31,7 +31,6 @@ func main() {
 
 	//connect to db
 	db := database.InitDB()
-
 	//seeding actions
 	err1 := database.Users(db)
 	if err1 != nil {

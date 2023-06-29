@@ -29,7 +29,7 @@ func initSession() *scs.SessionManager {
 }
 
 func initRedis() *redis.Pool {
-	err := godotenv.Load("app.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		fmt.Println("Error in loading env file ", err)
 	}

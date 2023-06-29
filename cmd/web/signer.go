@@ -19,7 +19,7 @@ var secretKey []byte
 // NewURLSigner creates a new signer
 
 func NewURLSigner() {
-	err := godotenv.Load("app.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("error in loading env file for Secret", err)
 	}
