@@ -1,38 +1,19 @@
-# fly.toml app configuration file generated for my-go-app on 2023-07-05T08:54:15+01:00
+# fly.toml app configuration file generated for my-go-app on 2023-07-05T18:08:42+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = "my-go-app"
-primary_region = "cdg"
-kill_signal = "SIGINT"
-kill_timeout = "30s"
-
-[experimental]
-  cmd = ["go run ./cmd/web"]
+primary_region = "atl"
 
 [env]
   file = ".env"
   port = "8080"
 
-[[services]]
-  protocol = "tcp"
+[http_service]
   internal_port = 8080
-
-  [[services.ports]]
-    port = 8080
-    handlers = ["http"]
-    force_https = true
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-
-  [[services.tcp_checks]]
-    interval = "5s"
-    timeout = "4s"
-    grace_period = "1s"
-    restart_limit = 0
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
