@@ -27,10 +27,8 @@ func connectToDB() *sql.DB {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
-
 	dsn := os.Getenv("DSN")
 	fmt.Println(dsn)
-
 	for {
 		connection, err := openDB(dsn)
 		if err != nil {
@@ -39,11 +37,9 @@ func connectToDB() *sql.DB {
 			log.Print("connected to database!")
 			return connection
 		}
-
 		if counts > 10 {
 			return nil
 		}
-
 		log.Print("Backing off for 1 second")
 		time.Sleep(1 * time.Second)
 		counts++
@@ -56,7 +52,6 @@ func openDB(dsn string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = db.Ping()
 	if err != nil {
 		return nil, err
