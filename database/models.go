@@ -1,17 +1,14 @@
 package database
 
 import (
-	"database/sql"
-	"time"
+	"gorm.io/gorm"
 )
 
-const dbTimeout = time.Second * 3
-
-var db *sql.DB
+var db *gorm.DB
 
 // New is the function used to create an instance of the data package. It returns the type
 // Model, which embeds all the types we want to be available to our application.
-func New(dbPool *sql.DB) Models {
+func New(dbPool *gorm.DB) Models {
 	db = dbPool
 
 	return Models{
