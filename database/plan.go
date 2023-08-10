@@ -1,109 +1,70 @@
 package database
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 // Plan is the type for subscription plans
 type Plan struct {
-	ID                  int
+	gorm.Model
 	PlanName            string
 	PlanAmount          int
-	PlanAmountFormatted string
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	PlanAmountFormatted string    `gorm:"-"`
+	UserPlan            *UserPlan `gorm:"foreignKey:UserID"`
 }
 
 func (p *Plan) GetAll() ([]*Plan, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
-
-	query := `select id, plan_name, plan_amount, created_at, updated_at
-	from plans order by id`
-
-	rows, err := db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
 	var plans []*Plan
 
-	for rows.Next() {
-		var plan Plan
-		err := rows.Scan(
-			&plan.ID,
-			&plan.PlanName,
-			&plan.PlanAmount,
-			&plan.CreatedAt,
-			&plan.UpdatedAt,
-		)
-		//Puts A currency format
-		plan.PlanAmountFormatted = plan.AmountForDisplay()
-		if err != nil {
-			log.Println("Error scanning", err)
-			return nil, err
-		}
-
-		plans = append(plans, &plan)
+	result := db.Order("id").Find(&plans)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-
+	for _, plan := range plans {
+		plan.PlanAmountFormatted = plan.AmountForDisplay()
+	}
 	return plans, nil
 }
 
 // GetOne returns one plan by id
 func (p *Plan) GetOne(id int) (*Plan, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
 	//when user slects a plan the id in the plan db is saved into
-	//the user_plann db
-	query := `select id, plan_name, plan_amount, created_at, updated_at from plans where id = $1`
-
+	//the user_plan db
 	var plan Plan
-	row := db.QueryRowContext(ctx, query, id)
-
-	err := row.Scan(
-		&plan.ID,
-		&plan.PlanName,
-		&plan.PlanAmount,
-		&plan.CreatedAt,
-		&plan.UpdatedAt,
-	)
-
-	if err != nil {
-		return nil, err
+	result := db.First(&plan, id)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-
 	plan.PlanAmountFormatted = plan.AmountForDisplay()
 
 	return &plan, nil
 }
 
 // SubscribeUserToPlan subscribes a user to one plan by insert
-// values into user_plans table
+// values into userplan table
 func (p *Plan) SubscribeUserToPlan(user User, plan Plan) error {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
+	tx := db.Begin() // Start a transaction
 
-	// delete existing plan, if any
-	stmt := `delete from user_plans where user_id = $1`
-	_, err := db.ExecContext(ctx, stmt, user.ID)
-	if err != nil {
+	// Delete existing plan for the user
+	if err := tx.Where("user_id = ?", user.ID).Delete(&UserPlan{}).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	// subscribe to new plan
-	stmt = `insert into user_plans (user_id, plan_id, created_at, updated_at)
-			values ($1, $2, $3, $4)`
+	// Subscribe user to the new plan
+	newUserPlan := &UserPlan{
+		UserID: user.ID,
+		PlanID: plan.ID,
+	}
 
-	_, err = db.ExecContext(ctx, stmt, user.ID, plan.ID, time.Now(), time.Now())
-	if err != nil {
+	if err := tx.Create(newUserPlan).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
-	return nil
+
+	return tx.Commit().Error
 }
 
 // AmountForDisplay formats the price we have in the DB as a currency string

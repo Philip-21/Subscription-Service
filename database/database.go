@@ -1,7 +1,6 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -11,17 +10,11 @@ import (
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func InitDB() *sql.DB {
-	conn := connectToDB()
-	if conn == nil {
-		log.Panic("can't connect to database")
-	}
-	return conn
-}
-
-func connectToDB() *sql.DB {
+func ConnectToDB() *gorm.DB {
 	counts := 0
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -30,7 +23,7 @@ func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN")
 	fmt.Println(dsn)
 	for {
-		connection, err := openDB(dsn)
+		connection, err := OpenDB(dsn)
 		if err != nil {
 			log.Println("postgres not yet ready...")
 		} else {
@@ -47,15 +40,25 @@ func connectToDB() *sql.DB {
 	}
 }
 
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("pgx", dsn)
+func OpenDB(dsn string) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	err = db.Ping()
+	err = db.AutoMigrate(&User{}, &Plan{})
 	if err != nil {
+		log.Println("Error in Migrations")
+	}
+	log.Println("migrations successful")
+	//verifies if a connection to the database is still alive, establishing a connection if necessary.
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Println("error in getting sql")
+	}
+	err = sqlDB.Ping()
+	if err != nil {
+		log.Println("Error in connection", err)
 		return nil, err
 	}
-
 	return db, nil
 }
